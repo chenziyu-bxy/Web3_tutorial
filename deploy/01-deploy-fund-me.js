@@ -11,19 +11,20 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments
 
     let dataFeedAddr
+    let confirmations
     if (developmentChains.includes(network.name)) {
         const mockV3Aggregator = await deployments.get("MockV3Aggregator")
         dataFeedAddr = mockV3Aggregator.address
     } else {
         dataFeedAddr = networkConfig[network.config.chainId].ethUsdDataFeed
-        confirmations = CONFIRMATIONS
+        confirmations = 0
     }
 
     const fundMe = await deploy("FundMe", {
         from: firstAccount,
         args: [Lock_Time, dataFeedAddr],
         log: true,
-        waitConfirmations: CONFIRMATIONS
+        waitConfirmations: confirmations
     })
     if (hre.network.config.chainId == 11155111 && process.env.ETHERSCAN_API_KEY) {
         await hre.run("verify:verify", {
